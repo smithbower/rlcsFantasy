@@ -1,3 +1,20 @@
+## ###########################################################
+## ###########################################################
+## selectTeam.r                                              #
+##                                                           #
+## Use a genetic algorithm to select the most cost-effective #
+## team for RLCS Season 7.                                   #
+##                                                           #
+## Solves for selecting players given cost, historical stats,#
+## score multipliers for field position, and salary cap.     #
+##                                                           #
+## Data comes from octane.gg.                                #
+##                                                           #
+##                                                           #
+## April 8th, 2019                                           #
+## Stephen Smithbower (smithy.s@gmail.com)                   #
+## ###########################################################
+## ###########################################################
 library(httr)
 library(jsonlite)
 library(ggplot2)
