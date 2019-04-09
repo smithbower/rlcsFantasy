@@ -15,9 +15,10 @@ library(httr)
 library(jsonlite)
 library(dplyr)
 
-dfPlayerData <- setNames(data.frame(matrix(ncol = 12, nrow = 0)), 
+dfPlayerData <- setNames(data.frame(matrix(ncol = 14, nrow = 0)), 
                          c("Player", "GP", "Score", "ScoreSqr", "Goals", "GoalsSqr", 
-                           "Assists", "AssistsSqr", "Saves", "SavesSqr", "Shots", "ShotsSqr"))
+                           "Assists", "AssistsSqr", "Saves", "SavesSqr", "Shots", 
+                           "ShotsSqr", "AdjustedScore", "AdjustedScoreSqr"))
 
 ## Week 1
 matchIDs <- c(1740101, 1740102, 1740103, 1740104, 1740105) ## NA
@@ -45,7 +46,7 @@ for (matchID in matchIDs)
     matchDataResp <- GET(mUrl)
     
     matchData <- fromJSON(content(matchDataResp, as = "text"))$data
-    matchData <- matchData[c("Player", "Score", "Goals", "Assists", "Saves", "Shots")]
+    matchData <- matchData[c("Player", "Score", "Goals", "Assists", "Saves", "Shots", "MVP")]
     
     ## Empty row to just add names.
     for (i in 1:3) ## Ignore the 4th row which is the team total.
@@ -61,7 +62,7 @@ for (matchID in matchIDs)
       gameDataResp <- GET(mUrl)
       
       gameData <- fromJSON(content(gameDataResp, as = "text"))$data
-      gameData <- gameData[c("Player", "Score", "Goals", "Assists", "Saves", "Shots")]
+      gameData <- gameData[c("Player", "Score", "Goals", "Assists", "Saves", "Shots", "MVP")]
       
       for (j in 1:3)
       {
@@ -78,6 +79,18 @@ for (matchID in matchIDs)
           dfPlayerData[pID, sumID] <- sum(c(as.numeric(dfPlayerData[pID, sumID]), as.numeric(gameData[j, gameID])), na.rm = TRUE)
           dfPlayerData[pID, sqrID] <- sum(c(as.numeric(dfPlayerData[pID, sqrID]), (as.numeric(gameData[j, gameID]^2))), na.rm = TRUE)
         }
+        
+        ## Compute adjusted score seperately - this score is the result of clears, touches, faceoffs, etc and have
+        ## the contribution of shots, goals, saves, assists, mvp, etc removed.
+        ##
+        ## Goals, Assits, Saves, Shots, MVP
+        pts <- as.numeric(gameData[j, 2])
+        ptsContrib <- (gameData[j, 3] * 100) + (gameData[j, 4] * 50) + (gameData[j, 5] * 50) + 
+                      (gameData[j, 6] * 20) + (gameData[j, 7] * 100)
+        adjustedPts <- pts - ptsContrib
+        
+        dfPlayerData[pID, "AdjustedScore"]  <- sum(c(dfPlayerData[pID, "AdjustedScore"], adjustedPts), na.rm = TRUE)
+        dfPlayerData[pID, "AdjustedScoreSqr"] <- sum(c(dfPlayerData[pID, "AdjustedScoreSqr"], adjustedPts^2), na.rm = TRUE)
       }
     }
   }
