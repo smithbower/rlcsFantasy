@@ -1,3 +1,20 @@
+calcStdv <- function(S2, S, N)
+{
+  return(sqrt((S2 - (S^2) / N) / (N - 1)))
+}
+
+calcLogMean <- function(m, s)
+{
+  return(log(m) - 0.5 * log((s/m)^2 + 1))
+}
+
+calcLogStdv <- function(m, s)
+{
+  return(sqrt(log((s/m)^2 + 1)))
+}
+
+
+
 ## Params
 season <- 7
 numSimulations <- 1
@@ -25,7 +42,7 @@ playerData <- data.frame("Player" = NA, "GP" = NA, "GoalsMean" = NA, "GoalsStdv"
                          "SavesMean" = NA, "SavesStdv" = NA, "ShotsMean" = NA, "ShotsStdv" = NA, "AdjustedScoreMean" = NA,
                          "AdjustedScoreStdv" = NA)
 
-## Compute mean and variance for each player using real data, so we can do
+## Compute mean and stdv for each player using real data, so we can do
 ## simulated stats for pending weeks.
 for (week in 1:length(weeklyPlayerData))
 {
@@ -33,19 +50,20 @@ for (week in 1:length(weeklyPlayerData))
   
   for (pID in 1:nrow(data))
   {
-    if (length(which(playerData["Player"] == data[pID,]["Player"])) == 0)
-    {
-      playerData[nrow(playerData) + 1, ]["Player"] <- data[pID,]["Player"]
-    }
-  }
-  
-  #(data[i, "AdjustedScoreVar"] - (data[i, "AdjustedScore"]^2/data[i, "GP"])) / (data[i, "GP"] - 1)
-  
-  ## Compute means and variance.
-  for (i in 1:nrow(data))
-  {
-    weeklyPlayerData[[week]][i, "AdjustedScore"] <- (data[i, "AdjustedScore"] / data[i, "GP"])
-    weeklyPlayerData[[week]][i, "AdjustedScoreVar"] <- (data[i, "AdjustedScoreVar"] / (data[i, "GP"] - 1))
+    weeklyPlayerData[[week]][pID, "GoalsMean"] <- data[pID, "Goals"] / data[pID, "GP"]
+    weeklyPlayerData[[week]][pID, "GoalsStdv"] <- calcStdv(data[pID, "GoalsSqr"], data[pID, "Goals"], data[pID, "GP"])
+    
+    weeklyPlayerData[[week]][pID, "AssistsMean"] <- data[pID, "Assists"] / data[pID, "GP"]
+    weeklyPlayerData[[week]][pID, "AssistsStdv"] <- calcStdv(data[pID, "AssistsSqr"], data[pID, "Assists"], data[pID, "GP"])
+    
+    weeklyPlayerData[[week]][pID, "SavesMean"] <- data[pID, "Saves"] / data[pID, "GP"]
+    weeklyPlayerData[[week]][pID, "SavesStdv"] <- calcStdv(data[pID, "SavesSqr"], data[pID, "Assists"], data[pID, "GP"])
+    
+    weeklyPlayerData[[week]][pID, "ShotsMean"] <- data[pID, "Shots"] / data[pID, "GP"]
+    weeklyPlayerData[[week]][pID, "ShotsStdv"] <- calcStdv(data[pID, "ShotsSqr"], data[pID, "Shots"], data[pID, "GP"])
+    
+    weeklyPlayerData[[week]][pID, "AdjustedScoreMean"] <- data[pID, "AdjustedScore"] / data[pID, "GP"]
+    weeklyPlayerData[[week]][pID, "AdjustedScoreStdv"] <- calcStdv(data[pID, "AdjustedScoreSqr"], data[pID, "AdjustedScore"], data[pID, "GP"])
   }
 }
 
