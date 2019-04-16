@@ -1,3 +1,5 @@
+source("common.R")
+
 calcStdv <- function(S2, S, N)
 {
   return(sqrt((S2 - (S^2) / N) / (N - 1)))
@@ -11,6 +13,11 @@ calcLogMean <- function(m, s)
 calcLogStdv <- function(m, s)
 {
   return(sqrt(log((s/m)^2 + 1)))
+}
+
+estConf95 <- function(m, s, n)
+{
+  return(c(m + 1.96 * sqrt((s^2/n)), max(0, m - 1.96 * sqrt((s^2/n)))))
 }
 
 
@@ -38,9 +45,6 @@ for (i in 1:5)
 ## 100 - (0.2 & nWeek).
 ogDataWeight <- 1.0 - (0.2 * length(weeklyPlayerData))
 
-playerData <- data.frame("Player" = NA, "GP" = NA, "GoalsMean" = NA, "GoalsStdv" = NA, "AssistsMean" = NA, "AssitsStdv" = NA,
-                         "SavesMean" = NA, "SavesStdv" = NA, "ShotsMean" = NA, "ShotsStdv" = NA, "AdjustedScoreMean" = NA,
-                         "AdjustedScoreStdv" = NA)
 
 ## Compute mean and stdv for each player using real data, so we can do
 ## simulated stats for pending weeks.
@@ -65,19 +69,10 @@ for (week in 1:length(weeklyPlayerData))
     weeklyPlayerData[[week]][pID, "AdjustedScoreMean"] <- data[pID, "AdjustedScore"] / data[pID, "GP"]
     weeklyPlayerData[[week]][pID, "AdjustedScoreStdv"] <- calcStdv(data[pID, "AdjustedScoreSqr"], data[pID, "AdjustedScore"], data[pID, "GP"])
   }
-}
-
-## #############################################################################
-## MONTE CARLO SIMULATION
-## #############################################################################
-for (iterations in 1:numSimulations)
-{
   
-  ## Simulate player stats for each week.
-  for (week in 1:5)
-  {
-    ## If we have real data for a week, use that. Otherwise we draw from 
-    ## distribution.
-    
-  }
+  ## Append expected scores for attacker, defender, and midfielder positions for each player.
+  f <- apply(weeklyPlayerData[[week]][,c('GP', 'Score', 'Goals', 'Assists', 'Shots', 'Saves')], 1, function(x) scoreFunc(x[1], x[2], x[3], x[4], x[5], x[6]))
+  f <- t(f)
+  
+  weeklyPlayerData[[week]] <- cbind(weeklyPlayerData[[week]], attackScore = f[,1], midfieldScore = f[,2], defenderScore = f[,3])
 }
