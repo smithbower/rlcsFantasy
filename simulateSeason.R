@@ -59,17 +59,17 @@ for (week in 1:length(weeklyPlayerData))
     
     if (week > 1) ## Keep running totals throughout the season.
     {
-      weeklyPlayerData[[week]][pID, "GP"] <- weeklyPlayerData[[week - 1]][pID, "GP"] + weeklyPlayerData[[week]][pID, "GP"]
-      weeklyPlayerData[[week]][pID, "Score"] <- weeklyPlayerData[[week - 1]][pID, "Score"] + weeklyPlayerData[[week]][pID, "Score"]
-      weeklyPlayerData[[week]][pID, "ScoreSqr"] <- weeklyPlayerData[[week - 1]][pID, "ScoreSqr"] + weeklyPlayerData[[week]][pID, "ScoreSqr"]
-      weeklyPlayerData[[week]][pID, "Goals"] <- weeklyPlayerData[[week - 1]][pID, "Goals"] + weeklyPlayerData[[week]][pID, "Goals"]
-      weeklyPlayerData[[week]][pID, "GoalsSqr"] <- weeklyPlayerData[[week - 1]][pID, "GoalsSqr"] + weeklyPlayerData[[week]][pID, "GoalsSqr"]
-      weeklyPlayerData[[week]][pID, "Assists"] <- weeklyPlayerData[[week - 1]][pID, "Assists"] + weeklyPlayerData[[week]][pID, "Assists"]
-      weeklyPlayerData[[week]][pID, "AssistsSqr"] <- weeklyPlayerData[[week - 1]][pID, "AssistsSqr"] + weeklyPlayerData[[week]][pID, "AssistsSqr"]
-      weeklyPlayerData[[week]][pID, "Saves"] <- weeklyPlayerData[[week - 1]][pID, "Saves"] + weeklyPlayerData[[week]][pID, "Saves"]
-      weeklyPlayerData[[week]][pID, "SavesSqr"] <- weeklyPlayerData[[week - 1]][pID, "SavesSqr"] + weeklyPlayerData[[week]][pID, "SavesSqr"]
-      weeklyPlayerData[[week]][pID, "Shots"] <- weeklyPlayerData[[week - 1]][pID, "Shots"] + weeklyPlayerData[[week]][pID, "Shots"]
-      weeklyPlayerData[[week]][pID, "ShotsSqr"] <- weeklyPlayerData[[week - 1]][pID, "ShotsSqr"] + weeklyPlayerData[[week]][pID, "ShotsSqr"]
+      weeklyPlayerData[[week]][pID, "GP"]         <- weeklyPlayerData[[week - 1]][pID, "GP"]          + weeklyPlayerData[[week]][pID, "GP"]
+      weeklyPlayerData[[week]][pID, "Score"]      <- weeklyPlayerData[[week - 1]][pID, "Score"]       + weeklyPlayerData[[week]][pID, "Score"]
+      weeklyPlayerData[[week]][pID, "ScoreSqr"]   <- weeklyPlayerData[[week - 1]][pID, "ScoreSqr"]    + weeklyPlayerData[[week]][pID, "ScoreSqr"]
+      weeklyPlayerData[[week]][pID, "Goals"]      <- weeklyPlayerData[[week - 1]][pID, "Goals"]       + weeklyPlayerData[[week]][pID, "Goals"]
+      weeklyPlayerData[[week]][pID, "GoalsSqr"]   <- weeklyPlayerData[[week - 1]][pID, "GoalsSqr"]    + weeklyPlayerData[[week]][pID, "GoalsSqr"]
+      weeklyPlayerData[[week]][pID, "Assists"]    <- weeklyPlayerData[[week - 1]][pID, "Assists"]     + weeklyPlayerData[[week]][pID, "Assists"]
+      weeklyPlayerData[[week]][pID, "AssistsSqr"] <- weeklyPlayerData[[week - 1]][pID, "AssistsSqr"]  + weeklyPlayerData[[week]][pID, "AssistsSqr"]
+      weeklyPlayerData[[week]][pID, "Saves"]      <- weeklyPlayerData[[week - 1]][pID, "Saves"]       + weeklyPlayerData[[week]][pID, "Saves"]
+      weeklyPlayerData[[week]][pID, "SavesSqr"]   <- weeklyPlayerData[[week - 1]][pID, "SavesSqr"]    + weeklyPlayerData[[week]][pID, "SavesSqr"]
+      weeklyPlayerData[[week]][pID, "Shots"]      <- weeklyPlayerData[[week - 1]][pID, "Shots"]       + weeklyPlayerData[[week]][pID, "Shots"]
+      weeklyPlayerData[[week]][pID, "ShotsSqr"]   <- weeklyPlayerData[[week - 1]][pID, "ShotsSqr"]    + weeklyPlayerData[[week]][pID, "ShotsSqr"]
     }
     
     weeklyPlayerData[[week]][pID, "price"] <- playerScores[ogID, "price"]
