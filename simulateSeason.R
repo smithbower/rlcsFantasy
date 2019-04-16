@@ -128,14 +128,59 @@ for (week in 1:length(weeklyPlayerData))
 ## #############################################################################
 ## OPTIMIZATION                                                               ##
 ## #############################################################################
-selectTeam <- function(initialTeam, week, ogData, weeklyData)
+selectTeam <- function(initialTeam, data)
 {
-  ## Compute new expected points using weighted averages.
-  weightedData <- setNames(data.frame(matrix(ncol = 5, nrow = 0)), 
-                                      c("Player", "attackerScore", "defenderScore", "midfieldScore", "Price"))
+  gaResult <- ga(type              = "real-valued",
+                 fitness           = function(x) estimatedScorePick2(x, playerScores, initialTeam),
+                 suggestions       = initialTeam,
+                 lower             = c(1,1,1,1,1,1),
+                 upper             = c(numPlayers,numPlayers,numPlayers,numPlayers,numPlayers,numPlayers),
+                 popSize           = 400,
+                 maxiter           = 1000000, 
+                 run               = 100,
+                 optim             = TRUE,
+                 names             = c("atk1", "atk2", "def1", "def2", "mid1", "mid2"),
+                 seed              = 1989
+  )
   
-  for (i in 1 : nrows(ogData))
-  {
-    weightedData
-  }
+  return(gaResult)
+}
+
+estimatedScorePick2 <- function(s, prf, initialTeam)
+{
+  playerScores <- prf
+  s <- floor(s)
+  
+  #Make sure we don't select the same player more than once.
+  uniquePlayers <- unique(s)
+  
+  if (length(s) != length(uniquePlayers))
+    return(0)
+  
+  #Make sure we don't change more than 2 players at a time - though we don't
+  #care about changing positions.
+  if (sum(initialTeam %in% s, na.rm = TRUE) < 4)
+    return(0)
+  
+  #Make sure we don't spend more than our budget.
+  maxBudget = 10000
+  totalCost = playerScores[s[1],]$price +
+    playerScores[s[2],]$price +
+    playerScores[s[3],]$price +
+    playerScores[s[4],]$price +
+    playerScores[s[5],]$price +
+    playerScores[s[6],]$price
+  
+  if (totalCost > maxBudget)
+    return(0)
+  
+  
+  score <- playerScores[s[1],]$attackScore +
+    playerScores[s[2],]$attackScore +
+    playerScores[s[3],]$defenderScore +
+    playerScores[s[4],]$defenderScore +
+    playerScores[s[5],]$midfieldScore +
+    playerScores[s[6],]$midfieldScore
+  
+  return(score)
 }
