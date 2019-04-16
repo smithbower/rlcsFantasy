@@ -15,7 +15,7 @@ calcLogStdv <- function(m, s)
   return(sqrt(log((s/m)^2 + 1)))
 }
 
-estConf95 <- function(m, s, n)
+estConf95 <- function(m, s, n) ##See: http://jse.amstat.org/v13n1/olsson.html
 {
   return(c(m + 1.96 * sqrt((s^2/n)), max(0, m - 1.96 * sqrt((s^2/n)))))
 }
@@ -130,6 +130,8 @@ for (week in 1:length(weeklyPlayerData))
 ## #############################################################################
 selectTeam <- function(initialTeam, data)
 {
+  numPlayers <- nrow(data)
+  
   gaResult <- ga(type              = "real-valued",
                  fitness           = function(x) estimatedScorePick2(x, playerScores, initialTeam),
                  suggestions       = initialTeam,
@@ -137,7 +139,7 @@ selectTeam <- function(initialTeam, data)
                  upper             = c(numPlayers,numPlayers,numPlayers,numPlayers,numPlayers,numPlayers),
                  popSize           = 400,
                  maxiter           = 1000000, 
-                 run               = 100,
+                 run               = 500,
                  optim             = TRUE,
                  names             = c("atk1", "atk2", "def1", "def2", "mid1", "mid2"),
                  seed              = 1989
