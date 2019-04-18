@@ -45,6 +45,47 @@ eff <- function(x, y)
 }
 
 
+## teamNamesToIDs
+## ###########################################################
+## Converts a vector of player names to their IDs
+##
+## return: A vector of integers.
+teamNamesToIDs <- function(team, data)
+{
+  t <- c(which(data$Player == as.character(team[1])), 
+         which(data$Player == as.character(team[2])), 
+         which(data$Player == as.character(team[3])), 
+         which(data$Player == as.character(team[4])),
+         which(data$Player == as.character(team[5])), 
+         which(data$Player == as.character(team[6]))) 
+  
+  return(t)
+}
+
+
+## estimateScore
+## ###########################################################
+## Computes the sum of scores for a vector of player IDs.
+##
+## In order: attacker1, attacker2, defender1, defender2,
+##           midfielder1, midfielder2
+##
+## return: A vector of integers.
+estimateScore <- function(team, data)
+{
+  score <- data[team[1],]$attackerScore +
+           data[team[2],]$attackerScore +
+           data[team[3],]$defenderScore +
+           data[team[4],]$defenderScore +
+           data[team[5],]$midfieldScore +
+           data[team[6],]$midfieldScore
+  
+  return(score)
+}
+
+
+
+
 
 ## ###########################################################
 ## ###########################################################
