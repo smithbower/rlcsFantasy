@@ -5,7 +5,7 @@ library(tidyverse)
 source("simulateSeason.R")
 
 p_week <- 2
-p_run <- 500
+p_run <- 100
 
 
 p_teams_stephen <- read.csv("teams_stephen.csv")
@@ -19,7 +19,7 @@ Date published: April 16, 2019
 <br><br>
 
 Selected teams:<br>
-```{r, include=FALSE}
+```{r, include=FALSE, results='hide'}
 ## Run optimizer to find a team for this week.
 stephen_lastTeam <- c(which(weeklyPlayerData[[p_week - 1]]$Player == as.character(p_teams_stephen[1,(p_week)])), 
                       which(weeklyPlayerData[[p_week - 1]]$Player == as.character(p_teams_stephen[2,(p_week)])), 
@@ -32,15 +32,15 @@ stephen_newTeam <- selectTeam(stephen_lastTeam, weeklyPlayerData[[p_week - 1]], 
 
 ```{r, echo=FALSE}
 ## Prep new table showing old teams + optimized team for this week.
-subset(p_teams_stephen, select = c(1, rep(2:(p_week + 1))))
+## Pull out the new team solution.
+stephen_newTeam_names <- weeklyPlayerData[[p_week - 1]][floor(stephen_newTeam@solution[end(stephen_newTeam@solution)[1],]),]$Player
+p_teams_stephen$Suggested <- stephen_newTeam_names
 
-kable(subset(p_teams_stephen, select = c(1, rep(2:(p_week + 1)))), caption="Stephen's Weekly Teams") %>% kable_styling
+
+kable(subset(p_teams_stephen, select = c(1, rep(2:(p_week + 1)), ncol(p_teams_stephen))), caption="Stephen's Weekly Teams") %>% kable_styling
 ```
 <br>
 
-```{r}
-plot(cars)
-```
 
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
 
