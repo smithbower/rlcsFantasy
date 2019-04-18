@@ -71,7 +71,7 @@ for (week in 1:length(weeklyPlayerData))
   for (j in 3:ncol(weeklyPlayerData[[week]]))
     weeklyPlayerData[[week]][,j] <- as.numeric(weeklyPlayerData[[week]][,j])
   
-  for (pID in 1:nrow(data))
+  for (pID in 1:nrow(weeklyPlayerData[[week]]))
   {
     ogID <- which(as.character(playerScores$Player) == as.character(weeklyPlayerData[[week]][pID, "Player"]))
     if (length(ogID) == 0)
