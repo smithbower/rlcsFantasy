@@ -1,0 +1,49 @@
+```{r, include=FALSE}
+library(knitr)
+library(kableExtra)
+library(tidyverse)
+source("simulateSeason.R")
+
+p_week <- 2
+p_run <- 500
+
+
+p_teams_stephen <- read.csv("teams_stephen.csv")
+```
+
+---
+title: `r paste("Stephen's RLCS Season 7 Fantasy League", '<br>', 'Week', p_week, "Report")`
+output: html_notebook
+---
+Date published: April 16, 2019
+<br><br>
+
+Selected teams:<br>
+```{r, include=FALSE}
+## Run optimizer to find a team for this week.
+stephen_lastTeam <- c(which(weeklyPlayerData[[p_week - 1]]$Player == as.character(p_teams_stephen[1,(p_week)])), 
+                      which(weeklyPlayerData[[p_week - 1]]$Player == as.character(p_teams_stephen[2,(p_week)])), 
+                      which(weeklyPlayerData[[p_week - 1]]$Player == as.character(p_teams_stephen[3,(p_week)])), 
+                      which(weeklyPlayerData[[p_week - 1]]$Player == as.character(p_teams_stephen[4,(p_week)])),
+                      which(weeklyPlayerData[[p_week - 1]]$Player == as.character(p_teams_stephen[5,(p_week)])), 
+                      which(weeklyPlayerData[[p_week - 1]]$Player == as.character(p_teams_stephen[6,(p_week)]))) 
+stephen_newTeam <- selectTeam(stephen_lastTeam, weeklyPlayerData[[p_week - 1]], p_run)
+```
+
+```{r, echo=FALSE}
+## Prep new table showing old teams + optimized team for this week.
+subset(p_teams_stephen, select = c(1, rep(2:(p_week + 1))))
+
+kable(subset(p_teams_stephen, select = c(1, rep(2:(p_week + 1)))), caption="Stephen's Weekly Teams") %>% kable_styling
+```
+<br>
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
