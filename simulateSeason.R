@@ -2,7 +2,12 @@ source("common.R")
 
 calcStdv <- function(S2, S, N)
 {
-  return(sqrt((S2 - (S^2) / N) / (N - 1)))
+  t <- (S2 - (S^2) / N) / (N - 1)
+  
+  if (t == 0) return(0)
+  if (is.finite(t) == FALSE) return(0)
+
+  return(sqrt(t))
 }
 
 calcLogMean <- function(m, s)
@@ -17,6 +22,8 @@ calcLogStdv <- function(m, s)
 
 estConf95 <- function(m, s, n) ##See: http://jse.amstat.org/v13n1/olsson.html
 {
+  if (n == 0) return(0)
+  
   return(c(m + 1.96 * sqrt((s^2/n)), max(0, m - 1.96 * sqrt((s^2/n)))))
 }
 
@@ -26,9 +33,6 @@ estConf95 <- function(m, s, n) ##See: http://jse.amstat.org/v13n1/olsson.html
 season <- 7
 
 
-## Load base player data from pre-season.
-ogPlayerData <- read.csv("ogPlayerData.csv", TRUE)
-
 ## Load each week's stats.
 weeklyPlayerData <- list(5)
 for (i in 1:5)
@@ -36,7 +40,9 @@ for (i in 1:5)
   fname <- paste0("season", season, "_week", i, ".csv")
   
   if (file.exists(fname))
-    weeklyPlayerData[[i]] <- read.csv(fname)
+  {
+    weeklyPlayerData[[i]] <- read.csv(fname, stringsAsFactors = FALSE)
+  }
 }
 
 ## Compute weighting for each week + OG data.. want season data to be weighted
@@ -44,12 +50,26 @@ for (i in 1:5)
 ## 100 - (0.2 * nWeek).
 ogDataWeight <- 1.0 - (0.2 * length(weeklyPlayerData))
 
-
 ## Compute mean and stdv for each player using real data, so we can do
 ## simulated stats for pending weeks.
+
+## Make sure that any players in the OG dataset that aren't in the first week
+## get added.
+for (pID in 1:nrow(playerScores))
+{
+  if (length(which(as.character(weeklyPlayerData[[1]]$Player) == as.character(playerScores[pID, "Player"]))) == 0)
+  {
+    gp <- playerScores[pID, "G"]
+    newRow <- c(as.character(playerScores[pID, "Player"]), as.character(playerScores[pID, "Player"]), 1, (playerScores[pID, "Score"]/gp),1, (playerScores[pID, "Goals"]/gp), 1,
+                (playerScores[pID, "Assists"]/gp), 1, (playerScores[pID, "Saves"]/gp), 1, (playerScores[pID, "Shots"]/gp), 1, (playerScores[pID, "Score"]/gp), 1)
+    weeklyPlayerData[[1]] <- rbind(weeklyPlayerData[[1]], newRow)
+  }
+}
+
 for (week in 1:length(weeklyPlayerData))
 {
-  data <- weeklyPlayerData[[week]]
+  for (j in 3:ncol(weeklyPlayerData[[week]]))
+    weeklyPlayerData[[week]][,j] <- as.numeric(weeklyPlayerData[[week]][,j])
   
   for (pID in 1:nrow(data))
   {
@@ -59,18 +79,20 @@ for (week in 1:length(weeklyPlayerData))
     
     if (week > 1) ## Keep running totals throughout the season.
     {
-      weeklyPlayerData[[week]][pID, "GP"]         <- weeklyPlayerData[[week - 1]][pID, "GP"]          + weeklyPlayerData[[week]][pID, "GP"]
-      weeklyPlayerData[[week]][pID, "Score"]      <- weeklyPlayerData[[week - 1]][pID, "Score"]       + weeklyPlayerData[[week]][pID, "Score"]
-      weeklyPlayerData[[week]][pID, "ScoreSqr"]   <- weeklyPlayerData[[week - 1]][pID, "ScoreSqr"]    + weeklyPlayerData[[week]][pID, "ScoreSqr"]
-      weeklyPlayerData[[week]][pID, "Goals"]      <- weeklyPlayerData[[week - 1]][pID, "Goals"]       + weeklyPlayerData[[week]][pID, "Goals"]
-      weeklyPlayerData[[week]][pID, "GoalsSqr"]   <- weeklyPlayerData[[week - 1]][pID, "GoalsSqr"]    + weeklyPlayerData[[week]][pID, "GoalsSqr"]
-      weeklyPlayerData[[week]][pID, "Assists"]    <- weeklyPlayerData[[week - 1]][pID, "Assists"]     + weeklyPlayerData[[week]][pID, "Assists"]
-      weeklyPlayerData[[week]][pID, "AssistsSqr"] <- weeklyPlayerData[[week - 1]][pID, "AssistsSqr"]  + weeklyPlayerData[[week]][pID, "AssistsSqr"]
-      weeklyPlayerData[[week]][pID, "Saves"]      <- weeklyPlayerData[[week - 1]][pID, "Saves"]       + weeklyPlayerData[[week]][pID, "Saves"]
-      weeklyPlayerData[[week]][pID, "SavesSqr"]   <- weeklyPlayerData[[week - 1]][pID, "SavesSqr"]    + weeklyPlayerData[[week]][pID, "SavesSqr"]
-      weeklyPlayerData[[week]][pID, "Shots"]      <- weeklyPlayerData[[week - 1]][pID, "Shots"]       + weeklyPlayerData[[week]][pID, "Shots"]
-      weeklyPlayerData[[week]][pID, "ShotsSqr"]   <- weeklyPlayerData[[week - 1]][pID, "ShotsSqr"]    + weeklyPlayerData[[week]][pID, "ShotsSqr"]
+      weeklyPlayerData[[week]][pID, "GP"]         <- sum(weeklyPlayerData[[week - 1]][pID, "GP"], weeklyPlayerData[[week]][pID, "GP"], na.rm = TRUE)
+      weeklyPlayerData[[week]][pID, "Score"]      <- sum(weeklyPlayerData[[week - 1]][pID, "Score"], weeklyPlayerData[[week]][pID, "Score"], na.rm = TRUE)
+      weeklyPlayerData[[week]][pID, "ScoreSqr"]   <- sum(weeklyPlayerData[[week - 1]][pID, "ScoreSqr"], weeklyPlayerData[[week]][pID, "ScoreSqr"], na.rm = TRUE)
+      weeklyPlayerData[[week]][pID, "Goals"]      <- sum(weeklyPlayerData[[week - 1]][pID, "Goals"], weeklyPlayerData[[week]][pID, "Goals"], na.rm = TRUE)
+      weeklyPlayerData[[week]][pID, "GoalsSqr"]   <- sum(weeklyPlayerData[[week - 1]][pID, "GoalsSqr"], weeklyPlayerData[[week]][pID, "GoalsSqr"], na.rm = TRUE)
+      weeklyPlayerData[[week]][pID, "Assists"]    <- sum(weeklyPlayerData[[week - 1]][pID, "Assists"], weeklyPlayerData[[week]][pID, "Assists"], na.rm = TRUE)
+      weeklyPlayerData[[week]][pID, "AssistsSqr"] <- sum(weeklyPlayerData[[week - 1]][pID, "AssistsSqr"], weeklyPlayerData[[week]][pID, "AssistsSqr"], na.rm = TRUE)
+      weeklyPlayerData[[week]][pID, "Saves"]      <- sum(weeklyPlayerData[[week - 1]][pID, "Saves"], weeklyPlayerData[[week]][pID, "Saves"], na.rm = TRUE)
+      weeklyPlayerData[[week]][pID, "SavesSqr"]   <- sum(weeklyPlayerData[[week - 1]][pID, "SavesSqr"], weeklyPlayerData[[week]][pID, "SavesSqr"], na.rm = TRUE)
+      weeklyPlayerData[[week]][pID, "Shots"]      <- sum(weeklyPlayerData[[week - 1]][pID, "Shots"], weeklyPlayerData[[week]][pID, "Shots"], na.rm = TRUE)
+      weeklyPlayerData[[week]][pID, "ShotsSqr"]   <- sum(weeklyPlayerData[[week - 1]][pID, "ShotsSqr"], weeklyPlayerData[[week]][pID, "ShotsSqr"], na.rm = TRUE)
     }
+    
+    data <- weeklyPlayerData[[week]]
     
     weeklyPlayerData[[week]][pID, "price"] <- playerScores[ogID, "price"]
     
@@ -128,21 +150,22 @@ for (week in 1:length(weeklyPlayerData))
 ## #############################################################################
 ## OPTIMIZATION                                                               ##
 ## #############################################################################
-selectTeam <- function(initialTeam, data)
+selectTeam <- function(initialTeam, data, run)
 {
   numPlayers <- nrow(data)
   
   gaResult <- ga(type              = "real-valued",
-                 fitness           = function(x) estimatedScorePick2(x, playerScores, initialTeam),
+                 fitness           = function(x) estimatedScorePick2(x, data, initialTeam),
                  suggestions       = initialTeam,
                  lower             = c(1,1,1,1,1,1),
                  upper             = c(numPlayers,numPlayers,numPlayers,numPlayers,numPlayers,numPlayers),
                  popSize           = 400,
                  maxiter           = 1000000, 
-                 run               = 500,
+                 run               = run,
                  optim             = TRUE,
                  names             = c("atk1", "atk2", "def1", "def2", "mid1", "mid2"),
-                 seed              = 1989
+                 seed              = 1989,
+                 parallel          = TRUE
   )
   
   return(gaResult)
@@ -150,7 +173,6 @@ selectTeam <- function(initialTeam, data)
 
 estimatedScorePick2 <- function(s, prf, initialTeam)
 {
-  playerScores <- prf
   s <- floor(s)
   
   #Make sure we don't select the same player more than once.
@@ -166,23 +188,23 @@ estimatedScorePick2 <- function(s, prf, initialTeam)
   
   #Make sure we don't spend more than our budget.
   maxBudget = 10000
-  totalCost = playerScores[s[1],]$price +
-    playerScores[s[2],]$price +
-    playerScores[s[3],]$price +
-    playerScores[s[4],]$price +
-    playerScores[s[5],]$price +
-    playerScores[s[6],]$price
+  totalCost = prf[s[1],]$price +
+              prf[s[2],]$price +
+              prf[s[3],]$price +
+              prf[s[4],]$price +
+              prf[s[5],]$price +
+              prf[s[6],]$price
+  
   
   if (totalCost > maxBudget)
     return(0)
   
-  
-  score <- playerScores[s[1],]$attackScore +
-    playerScores[s[2],]$attackScore +
-    playerScores[s[3],]$defenderScore +
-    playerScores[s[4],]$defenderScore +
-    playerScores[s[5],]$midfieldScore +
-    playerScores[s[6],]$midfieldScore
+  score <- prf[s[1],]$attackerScore +
+           prf[s[2],]$attackerScore +
+           prf[s[3],]$defenderScore +
+           prf[s[4],]$defenderScore +
+           prf[s[5],]$midfieldScore +
+           prf[s[6],]$midfieldScore
   
   return(score)
 }
