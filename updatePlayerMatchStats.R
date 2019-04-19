@@ -21,10 +21,13 @@ dfPlayerData <- setNames(data.frame(matrix(ncol = 14, nrow = 0)),
                            "ShotsSqr", "AdjustedScore", "AdjustedScoreSqr"))
 
 ## Week 1
-matchIDs <- c(1740101, 1740102, 1740103, 1740104, 1740105) ## NA
-matchIDs <- c(matchIDs, 1750101, 1750102, 1750103, 1750104, 1750105) ## EU
+#matchIDs <- c(1740101, 1740102, 1740103, 1740104, 1740105) ## NA
+#matchIDs <- c(matchIDs, 1750101, 1750102, 1750103, 1750104, 1750105) ## EU
 
 ## Week 2
+matchIDs <- c(1740106, 1740107, 1740108, 1740109, 1740110) ## NA
+matchIDs <- c(matchIDs, 1750106, 1750107, 1750108, 1750109, 1750110) ## EU
+
 ## Week 3
 ## Week 4
 ## Week 5
