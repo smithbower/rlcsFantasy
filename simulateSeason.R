@@ -2,7 +2,7 @@ source("common.R")
 
 calcStdv <- function(S2, S, N)
 {
-  t <- (S2 - (S^2) / N) / (N - 1)
+  t <- abs((S2 - (S^2) / N) / (N - 1))
   
   if (t == 0) return(0)
   if (is.finite(t) == FALSE) return(0)
