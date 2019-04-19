@@ -62,8 +62,8 @@ estimatedScore <- function(s, prf)
     return(0)
   
   
-  score <- playerScores[s[1],]$attackScore +
-    playerScores[s[2],]$attackScore +
+  score <- playerScores[s[1],]$attackerScore +
+    playerScores[s[2],]$attackerScore +
     playerScores[s[3],]$defenderScore +
     playerScores[s[4],]$defenderScore +
     playerScores[s[5],]$midfieldScore +

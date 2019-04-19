@@ -32,8 +32,8 @@ scoreFunc <- function(gp, score, goals, assists, saves, shots)
 ## return: A float.
 eff <- function(x, y)
 {
-  eff <- c((y[x[1],]$attackScore / y[x[1],]$price),
-           (y[x[1],]$attackScore / y[x[1],]$price),
+  eff <- c((y[x[1],]$attackerScore / y[x[1],]$price),
+           (y[x[1],]$attackerScore / y[x[1],]$price),
            (y[x[1],]$defenderScore / y[x[1],]$price),
            (y[x[1],]$defenderScore / y[x[1],]$price),
            (y[x[1],]$midfieldScore / y[x[1],]$price),
@@ -105,7 +105,7 @@ players <- read.csv("ogPlayerData.csv")
 playerScores <- apply(players[,c('G', 'Score', 'Goals', 'Assists', 'Shots', 'Saves')], 1, function(x) scoreFunc(x[1], x[2], x[3], x[4], x[5], x[6]))
 f <- t(playerScores)
 
-playerScores <- cbind(players, attackScore = f[,1], midfieldScore = f[,2], defenderScore = f[,3])
+playerScores <- cbind(players, attackerScore = f[,1], midfieldScore = f[,2], defenderScore = f[,3])
 
 
 ## Filter out players who have played fewer than 150 career games.
