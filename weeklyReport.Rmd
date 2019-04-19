@@ -4,11 +4,11 @@ library(kableExtra)
 library(tidyverse)
 source("simulateSeason.R")
 
-p_week <- 2
+p_week <- 3
 p_run <- 100
 
 
-p_teams_stephen <- read.csv("teams_stephen.csv")
+p_teams_stephen <- read.csv("teams_stephen.csv", stringsAsFactors = FALSE)
 ```
 
 ---
@@ -34,7 +34,27 @@ stephen_newTeam <- selectTeam(stephen_lastTeam, weeklyPlayerData[[p_week - 1]], 
 ## Prep new table showing old teams + optimized team for this week.
 ## Pull out the new team solution.
 stephen_newTeam_names <- weeklyPlayerData[[p_week - 1]][floor(stephen_newTeam@solution[end(stephen_newTeam@solution)[1],]),]$Player
-p_teams_stephen$Suggested <- stephen_newTeam_names
+p_teams_stephen$Suggested <- c(stephen_newTeam_names,0)
+
+p_teams_stephen <- rbind(p_teams_stephen, c("expected", c(1:(p_week+1))))
+
+## Calculate the expected number of points for each week.
+for (i in 1:p_week)
+{
+  team <- p_teams_stephen[1:6,(i + 1)]
+  if (i == 1)
+  {
+    score <- round(estimateScore(teamNamesToIDs(team, playerScores), playerScores)) ## Use OG data for the first week estimation.
+  }
+  else
+  {
+    score <- round(estimateScore(teamNamesToIDs(team, weeklyPlayerData[[i - 1]]), weeklyPlayerData[[i - 1]]))
+  }
+  
+  p_teams_stephen[8, (i + 1)] <- score
+}
+
+p_teams_stephen[8, p_week + 2] <- round(estimateScore(teamNamesToIDs(stephen_newTeam_names, weeklyPlayerData[[p_week - 1]]), weeklyPlayerData[[p_week - 1]]))
 
 
 kable(subset(p_teams_stephen, select = c(1, rep(2:(p_week + 1)), ncol(p_teams_stephen))), caption="Stephen's Weekly Teams") %>% kable_styling
