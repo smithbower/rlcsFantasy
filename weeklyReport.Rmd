@@ -5,7 +5,7 @@ library(tidyverse)
 source("simulateSeason.R")
 
 p_week <- 3
-p_run <- 100
+p_run <- 500
 
 
 p_teams_stephen <- read.csv("teams_stephen.csv", stringsAsFactors = FALSE)
@@ -62,8 +62,40 @@ kable(subset(p_teams_stephen, select = c(1, rep(2:(p_week + 1)), ncol(p_teams_st
 <br>
 
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+```{r, echo=FALSE}
+## Pull in min, max, and average score for each week so we can plot it.
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+t_score <- c()
+t_min <- c()
+t_max <- c()
+t_week <- c()
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+tj_type <- c("min", "max", "avg")
+
+for (i in 1:p_week)
+{
+  team <- p_teams_stephen[1:6,(i + 1)]
+  if (i == 1)
+  {
+    scores <- round(estimateScores(teamNamesToIDs(team, playerScores), playerScores)) ## Use OG data for the first week estimation.
+  }
+  else
+  {
+    scores <- round(estimateScores(teamNamesToIDs(team, weeklyPlayerData[[i - 1]]), weeklyPlayerData[[i - 1]]))
+  }
+  
+  t_min <- c(t_min, scores[1])
+  t_max <- c(t_max, scores[2])
+  t_score <- c(t_score, scores[3])
+  t_week <- c(t_week, i)
+
+}
+
+plotdf <- data.frame("score" = t_score, "min" = t_min, "max" = t_max, "week" = t_week)
+
+ggplot(plotdf) + 
+  geom_line(aes(week, score), group = 1) +
+  scale_y_continuous(breaks = c(1:p_week)) +
+  geom_ribbon(aes(x = week, ymax = max, ymin = min), alpha = 0.5)
+  
+```
