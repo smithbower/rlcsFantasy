@@ -70,7 +70,7 @@ teamNamesToIDs <- function(team, data)
 ## In order: attacker1, attacker2, defender1, defender2,
 ##           midfielder1, midfielder2
 ##
-## return: A vector of integers.
+## return: A score value.
 estimateScore <- function(team, data)
 {
   score <- data[team[1],]$attackerScore +
@@ -81,6 +81,46 @@ estimateScore <- function(team, data)
            data[team[6],]$midfieldScore
   
   return(score)
+}
+
+
+## estimateScores
+## ###########################################################
+## Computes the sum of scores for a vector of player IDs, for
+## min, max, and average.
+##
+## In order: attacker1, attacker2, defender1, defender2,
+##           midfielder1, midfielder2
+##
+## return: A vector of integers.
+estimateScores <- function(team, data)
+{
+  score <- data[team[1],]$attackerScore +
+           data[team[2],]$attackerScore +
+           data[team[3],]$defenderScore +
+           data[team[4],]$defenderScore +
+           data[team[5],]$midfieldScore +
+           data[team[6],]$midfieldScore
+  
+  maxscore <- data[team[1],]$maxAttackerScore +
+    data[team[2],]$maxAttackerScore +
+    data[team[3],]$maxDefenderScore +
+    data[team[4],]$maxDefenderScore +
+    data[team[5],]$maxMidfieldScore +
+    data[team[6],]$maxMidfieldScore
+  
+  maxscore <- max(score, maxscore)
+  
+  minscore <- data[team[1],]$minAttackerScore +
+    data[team[2],]$minAttackerScore +
+    data[team[3],]$minDefenderScore +
+    data[team[4],]$minDefenderScore +
+    data[team[5],]$minMidfieldScore +
+    data[team[6],]$minMidfieldScore
+  
+  minscore <- max(score, minscore)
+  
+  return(c(minscore, maxscore, score))
 }
 
 
