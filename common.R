@@ -118,7 +118,7 @@ estimateScores <- function(team, data)
     data[team[5],]$minMidfieldScore +
     data[team[6],]$minMidfieldScore
   
-  minscore <- max(score, minscore)
+  minscore <- min(score, minscore)
   
   return(c(minscore, maxscore, score))
 }
