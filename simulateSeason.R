@@ -68,6 +68,19 @@ for (pID in 1:nrow(playerScores))
 
 for (week in 1:length(weeklyPlayerData))
 {
+  if (week > 1)
+  {
+    ## Reverse search - if player is in last week's dataset but not this week,
+    ## add them to this week.
+    for (k in 1:nrow(weeklyPlayerData[[week - 1]]))
+    {
+      if (length(which(weeklyPlayerData[[week]]$Player == as.character(weeklyPlayerData[[week - 1]][k, "Player"]))) == 0)
+      {
+        weeklyPlayerData[[week]] <- rbind(weeklyPlayerData[[week]], weeklyPlayerData[[week - 1]][k, c(1:15)])
+      }
+    }
+  }
+  
   for (j in 3:ncol(weeklyPlayerData[[week]]))
     weeklyPlayerData[[week]][,j] <- as.numeric(weeklyPlayerData[[week]][,j])
   
@@ -126,6 +139,7 @@ for (week in 1:length(weeklyPlayerData))
     weeklyPlayerData[[week]][pID, "ShotsMax"] <- ci[1]
     weeklyPlayerData[[week]][pID, "ShotsMin"] <- ci[2]
   }
+
   
   ## Append expected scores for attacker, defender, and midfielder positions for each player.
   f <- apply(weeklyPlayerData[[week]][,c('GP', 'Score', 'Goals', 'Assists', 'Shots', 'Saves')], 1, function(x) scoreFunc(x[1], x[2], x[3], x[4], x[5], x[6]))
