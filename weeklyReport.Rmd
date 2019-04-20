@@ -5,17 +5,19 @@ library(tidyverse)
 source("simulateSeason.R")
 
 p_week <- 3
-p_run <- 500
+p_run <- 5
 
 
 p_teams_stephen <- read.csv("teams_stephen.csv", stringsAsFactors = FALSE)
+p_teams_michael <- read.csv("teams_michael.csv", stringsAsFactors = FALSE)
+p_teams_dave <- read.csv("teams_dave.csv", stringsAsFactors = FALSE)
 ```
 
 ---
 title: `r paste("Stephen's RLCS Season 7 Fantasy League", '<br>', 'Week', p_week, "Report")`
 output: html_notebook
 ---
-Date published: April 16, 2019
+Date published: April 19, 2019
 <br><br>
 
 Selected teams:<br>
@@ -28,6 +30,28 @@ stephen_lastTeam <- c(which(weeklyPlayerData[[p_week - 1]]$Player == as.characte
                       which(weeklyPlayerData[[p_week - 1]]$Player == as.character(p_teams_stephen[5,(p_week)])), 
                       which(weeklyPlayerData[[p_week - 1]]$Player == as.character(p_teams_stephen[6,(p_week)]))) 
 stephen_newTeam <- selectTeam(stephen_lastTeam, weeklyPlayerData[[p_week - 1]], p_run)
+```
+
+```{r, include=FALSE, results='hide'}
+## Run optimizer to find a team for this week.
+michael_lastTeam <- c(which(weeklyPlayerData[[p_week - 1]]$Player == as.character(p_teams_michael[1,(p_week)])), 
+                      which(weeklyPlayerData[[p_week - 1]]$Player == as.character(p_teams_michael[2,(p_week)])), 
+                      which(weeklyPlayerData[[p_week - 1]]$Player == as.character(p_teams_michael[3,(p_week)])), 
+                      which(weeklyPlayerData[[p_week - 1]]$Player == as.character(p_teams_michael[4,(p_week)])),
+                      which(weeklyPlayerData[[p_week - 1]]$Player == as.character(p_teams_michael[5,(p_week)])), 
+                      which(weeklyPlayerData[[p_week - 1]]$Player == as.character(p_teams_michael[6,(p_week)]))) 
+michael_newTeam <- selectTeam(michael_lastTeam, weeklyPlayerData[[p_week - 1]], p_run)
+```
+
+```{r, include=FALSE, results='hide'}
+## Run optimizer to find a team for this week.
+dave_lastTeam <- c(which(weeklyPlayerData[[p_week - 1]]$Player == as.character(p_teams_dave[1,(p_week)])), 
+                      which(weeklyPlayerData[[p_week - 1]]$Player == as.character(p_teams_dave[2,(p_week)])), 
+                      which(weeklyPlayerData[[p_week - 1]]$Player == as.character(p_teams_dave[3,(p_week)])), 
+                      which(weeklyPlayerData[[p_week - 1]]$Player == as.character(p_teams_dave[4,(p_week)])),
+                      which(weeklyPlayerData[[p_week - 1]]$Player == as.character(p_teams_dave[5,(p_week)])), 
+                      which(weeklyPlayerData[[p_week - 1]]$Player == as.character(p_teams_dave[6,(p_week)]))) 
+dave_newTeam <- selectTeam(dave_lastTeam, weeklyPlayerData[[p_week - 1]], p_run)
 ```
 
 ```{r, echo=FALSE}
@@ -59,43 +83,165 @@ p_teams_stephen[8, p_week + 2] <- round(estimateScore(teamNamesToIDs(stephen_new
 
 kable(subset(p_teams_stephen, select = c(1, rep(2:(p_week + 1)), ncol(p_teams_stephen))), caption="Stephen's Weekly Teams") %>% kable_styling
 ```
+
+<br>
+```{r, echo=FALSE}
+## Prep new table showing old teams + optimized team for this week.
+## Pull out the new team solution.
+michael_newTeam_names <- weeklyPlayerData[[p_week - 1]][floor(michael_newTeam@solution[end(michael_newTeam@solution)[1],]),]$Player
+p_teams_michael$Suggested <- c(michael_newTeam_names,0)
+
+p_teams_michael <- rbind(p_teams_michael, c("expected", c(1:(p_week+1))))
+
+## Calculate the expected number of points for each week.
+for (i in 1:p_week)
+{
+  team <- p_teams_michael[1:6,(i + 1)]
+  if (i == 1)
+  {
+    score <- round(estimateScore(teamNamesToIDs(team, playerScores), playerScores)) ## Use OG data for the first week estimation.
+  }
+  else
+  {
+    score <- round(estimateScore(teamNamesToIDs(team, weeklyPlayerData[[i - 1]]), weeklyPlayerData[[i - 1]]))
+  }
+  
+  p_teams_michael[8, (i + 1)] <- score
+}
+
+p_teams_michael[8, p_week + 2] <- round(estimateScore(teamNamesToIDs(michael_newTeam_names, weeklyPlayerData[[p_week - 1]]), weeklyPlayerData[[p_week - 1]]))
+
+
+kable(subset(p_teams_michael, select = c(1, rep(2:(p_week + 1)), ncol(p_teams_michael))), caption="Michael's Weekly Teams") %>% kable_styling
+```
+<br>
+```{r, echo=FALSE}
+## Prep new table showing old teams + optimized team for this week.
+## Pull out the new team solution.
+dave_newTeam_names <- weeklyPlayerData[[p_week - 1]][floor(dave_newTeam@solution[end(dave_newTeam@solution)[1],]),]$Player
+p_teams_dave$Suggested <- c(dave_newTeam_names,0)
+
+p_teams_dave <- rbind(p_teams_dave, c("expected", c(1:(p_week+1))))
+
+## Calculate the expected number of points for each week.
+for (i in 1:p_week)
+{
+  team <- p_teams_dave[1:6,(i + 1)]
+  if (i == 1)
+  {
+    score <- round(estimateScore(teamNamesToIDs(team, playerScores), playerScores)) ## Use OG data for the first week estimation.
+  }
+  else
+  {
+    score <- round(estimateScore(teamNamesToIDs(team, weeklyPlayerData[[i - 1]]), weeklyPlayerData[[i - 1]]))
+  }
+  
+  p_teams_dave[8, (i + 1)] <- score
+}
+
+p_teams_dave[8, p_week + 2] <- round(estimateScore(teamNamesToIDs(dave_newTeam_names, weeklyPlayerData[[p_week - 1]]), weeklyPlayerData[[p_week - 1]]))
+
+kable(subset(p_teams_dave, select = c(1, rep(2:(p_week + 1)), ncol(p_teams_dave))), caption="Dave's Weekly Teams") %>% kable_styling
+```
 <br>
 
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, dev = "CairoPNG"}
 ## Pull in min, max, and average score for each week so we can plot it.
 
 t_score <- c()
 t_min <- c()
 t_max <- c()
+t_actual <- c()
 t_week <- c()
 
-tj_type <- c("min", "max", "avg")
+t_michael_score <- c()
+t_michael_min <- c()
+t_michael_max <- c()
+t_michael_actual <- c()
+
+t_dave_score <- c()
+t_dave_min <- c()
+t_dave_max <- c()
+t_dave_actual <- c()
+
 
 for (i in 1:p_week)
 {
   team <- p_teams_stephen[1:6,(i + 1)]
+  team_michael <- p_teams_michael[1:6, (i + 1)]
+  team_dave <- p_teams_dave[1:6, (i + 1)]
   if (i == 1)
   {
     scores <- round(estimateScores(teamNamesToIDs(team, playerScores), playerScores)) ## Use OG data for the first week estimation.
+    scores_michael <- round(estimateScores(teamNamesToIDs(team_michael, playerScores), playerScores))
+    scores_dave <- round(estimateScores(teamNamesToIDs(team_dave, playerScores), playerScores))
   }
   else
   {
     scores <- round(estimateScores(teamNamesToIDs(team, weeklyPlayerData[[i - 1]]), weeklyPlayerData[[i - 1]]))
+    scores_michael <- round(estimateScores(teamNamesToIDs(team_michael, weeklyPlayerData[[i - 1]]), weeklyPlayerData[[i - 1]]))
+    scores_dave <- round(estimateScores(teamNamesToIDs(team_dave, weeklyPlayerData[[i - 1]]), weeklyPlayerData[[i - 1]]))
   }
   
   t_min <- c(t_min, scores[1])
   t_max <- c(t_max, scores[2])
   t_score <- c(t_score, scores[3])
   t_week <- c(t_week, i)
+  
+  t_michael_min <- c(t_michael_min, scores_michael[1])
+  t_michael_max <- c(t_michael_max, scores_michael[2])
+  t_michael_score <- c(t_michael_score, scores_michael[3])
+  
+  t_dave_min <- c(t_dave_min, scores_dave[1])
+  t_dave_max <- c(t_dave_max, scores_dave[2])
+  t_dave_score <- c(t_dave_score, scores_dave[3])
+  
+  if (i < p_week)
+  {
+    t_actual <- c(t_actual, as.numeric(p_teams_stephen[7, i + 1]))
+    t_michael_actual <- c(t_michael_actual, as.numeric(p_teams_michael[7, i + 1]))
+    t_dave_actual <- c(t_dave_actual, as.numeric(p_teams_dave[7, i + 1]))
+  }
+  else
+  {
+    t_actual <- c(t_actual, NA)
+    t_michael_actual <- c(t_michael_actual, NA)
+    t_dave_actual <- c(t_dave_actual, NA)
+  }
 
 }
 
-plotdf <- data.frame("score" = t_score, "min" = t_min, "max" = t_max, "week" = t_week)
+stephen_colour <- "#00BFC4"
+michael_colour <- "#F87CCD"
+dave_colour <- "#7CAE00"
 
-ggplot(plotdf) + 
-  geom_line(aes(week, score), group = 1) +
-  scale_y_continuous(breaks = c(1:p_week)) +
-  geom_ribbon(aes(x = week, ymax = max, ymin = min), alpha = 0.5)
+plotdf <- data.frame("score" = t_score, "actual" = t_actual, "min" = t_min, "max" = t_max, "week" = t_week,
+                     "score_michael" = t_michael_score, "actual_michael" = t_michael_actual,
+                     "min_michael" = t_michael_min, "max_michael" = t_michael_max,
+                     "score_dave" = t_dave_score, "actual_dave" = t_dave_actual,
+                     "min_dave" = t_dave_min, "max_dave" = t_dave_max)
+
+plot <- ggplot(plotdf) + 
+  geom_point(aes(week, score), colour=stephen_colour, pch=18, size=4) +
+  geom_point(aes(week, score_michael), colour=michael_colour, pch=17, size=3) +
+  geom_point(aes(week, score_dave), colour=dave_colour, pch=15, size=3) +
+  geom_ribbon(aes(x = week, ymax = max, ymin = min), fill=stephen_colour, alpha = 0.15) +
+  geom_ribbon(aes(x = week, ymax = max_michael, ymin = min_michael), fill=michael_colour,  alpha = 0.15) + 
+  geom_ribbon(aes(x = week, ymax = max_dave, ymin = min_dave), fill=dave_colour,  alpha = 0.15) +
+  scale_x_continuous(breaks = c(1:p_week))
+
+if (p_week > 2)
+{
+  plot <- plot + geom_line(aes(week, actual), colour=stephen_colour)
+  plot <- plot + geom_line(aes(week, actual_michael), colour=michael_colour)
+  plot <- plot + geom_line(aes(week, actual_dave), colour=dave_colour)
+} else{
+  plot <- plot + geom_point(aes(week, actual), colour=stephen_colour)
+  plot <- plot + geom_point(aes(week, actual_michael), colour=michael_colour)
+  plot <- plot + geom_point(aes(week, actual_dave), colour=dave_colour)
+}
+
+plot
   
 ```
